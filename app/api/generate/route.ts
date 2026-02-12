@@ -51,13 +51,13 @@ Avoid generic AI tone.
 Make outputs clearly different in style.
 
 Blog Content:
-${article.textContent.slice(0, 6000)}
+${article.textContent.slice(0, 2500)}
 `;
 
     const completion = await groq.chat.completions.create({
     model: "llama-3.1-8b-instant",
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.8,
+      temperature: 0.6,
     });
 
     return NextResponse.json({
