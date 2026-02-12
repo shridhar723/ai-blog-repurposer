@@ -1,7 +1,10 @@
+
 import { NextResponse } from "next/server";
 import { JSDOM } from "jsdom";
 import { Readability } from "@mozilla/readability";
 import Groq from "groq-sdk";
+
+
 
 export async function POST(req: Request) {
   try {
@@ -38,26 +41,26 @@ export async function POST(req: Request) {
     }
 
     const prompt = `
-You are a professional growth marketer.
-
 Repurpose this blog into:
 
 1. 3 LinkedIn posts (educational, controversial, storytelling)
 2. 3 Twitter/X hooks (first tweet only)
-3. 1 SEO meta description (<160 characters)
+3. 1 SEO meta description (<160 chars)
 4. 1 YouTube title + description
 
-Avoid generic AI tone.
-Make outputs clearly different in style.
+Plain text only.
+No markdown.
+No placeholders.
 
-Blog Content:
-${article.textContent.slice(0, 2000)}
+Blog:
+${article.textContent.slice(0, 1200)}
 `;
 
     const completion = await groq.chat.completions.create({
     model: "llama-3.1-8b-instant",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.6,
+      max_tokens: 700,
     });
 
     return NextResponse.json({
