@@ -1,63 +1,66 @@
-
 import { NextResponse } from "next/server";
-import { JSDOM } from "jsdom";
-import { Readability } from "@mozilla/readability";
 import Groq from "groq-sdk";
-
-
 
 export async function POST(req: Request) {
   try {
     const { url } = await req.json();
 
     if (!url) {
-      return NextResponse.json({ error: "URL required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "URL is required" },
+        { status: 400 }
+      );
     }
 
+    // Fetch blog page
     const response = await fetch(url, {
-      headers: { "User-Agent": "Mozilla/5.0" },
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+      },
     });
 
     if (!response.ok) {
-      return NextResponse.json({ error: "Failed to fetch URL" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Failed to fetch blog URL" },
+        { status: 400 }
+      );
     }
 
     const html = await response.text();
 
-    const dom = new JSDOM(html, { url });
-    const reader = new Readability(dom.window.document);
-    const article = reader.parse();
-
-    if (!article?.textContent) {
-      return NextResponse.json({ error: "Extraction failed" }, { status: 400 });
-    }
+    // Lightweight content extraction (Vercel-safe)
+    const cleanText = html
+      .replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, "")
+      .replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 1200); // limit content for speed
 
     const groq = new Groq({
       apiKey: process.env.GROQ_API_KEY,
     });
-
-    if (!process.env.GROQ_API_KEY) {
-      return NextResponse.json({ error: "Groq API key missing" }, { status: 500 });
-    }
 
     const prompt = `
 Repurpose this blog into:
 
 1. 3 LinkedIn posts (educational, controversial, storytelling)
 2. 3 Twitter/X hooks (first tweet only)
-3. 1 SEO meta description (<160 chars)
+3. 1 SEO meta description (under 160 characters)
 4. 1 YouTube title + description
 
-Plain text only.
+Return plain text only.
 No markdown.
-No placeholders.
+No asterisks.
+No placeholder text.
+Make each variation clearly different.
 
 Blog:
-${article.textContent.slice(0, 1200)}
+${cleanText}
 `;
 
     const completion = await groq.chat.completions.create({
-    model: "llama-3.1-8b-instant",
+      model: "llama-3.1-8b-instant",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.6,
       max_tokens: 700,
@@ -68,9 +71,9 @@ ${article.textContent.slice(0, 1200)}
     });
 
   } catch (error: any) {
-    console.error("ERROR:", error);
+    console.error(error);
     return NextResponse.json(
-      { error: error.message || "Server error" },
+      { error: "Something went wrong" },
       { status: 500 }
     );
   }
