@@ -51,7 +51,7 @@ Avoid generic AI tone.
 Make outputs clearly different in style.
 
 Blog Content:
-${article.textContent.slice(0, 2500)}
+${article.textContent.slice(0, 2000)}
 `;
 
     const completion = await groq.chat.completions.create({

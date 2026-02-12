@@ -57,10 +57,13 @@ export default function Home() {
 
         <button
           onClick={generateContent}
-className="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-md hover:opacity-90 transition duration-200 font-medium shadow-md hover:shadow-lg"
-
+          className="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-md hover:opacity-90 transition duration-200 font-medium shadow-md hover:shadow-lg"
         >
-          {loading ? "Generating..." : "Generate"}
+          {loading ? (
+            <span className="animate-pulse">Generating...</span>
+          ) : (
+            "Generate"
+          )}
         </button>
       </div>
 
@@ -77,8 +80,7 @@ className="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-md hover:opacity-90 tra
               <h2 className="font-semibold">Generated Content</h2>
               <button
                 onClick={() => copyToClipboard(output)}
-               className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-200 transition"
-
+                className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-200 transition"
               >
                 Copy All
               </button>
@@ -98,7 +100,7 @@ className="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-md hover:opacity-90 tra
                   </a>
                 ) : (
                   part
-                )
+                ),
               )}
             </div>
           </div>
